@@ -1,7 +1,12 @@
 <template>
   <div>
     <!-- 测试展开收起 -->
-    <h6 @click="isCollapse = !isCollapse" style="color:#fff;text-align:center;font-size:14px">{{isCollapse?"展开" :"收起"}}</h6>
+    <h6
+      @click="isCollapse = !isCollapse"
+      style="color: #fff; text-align: center; font-size: 14px"
+    >
+      {{ isCollapse ? "展开" : "收起" }}
+    </h6>
 
     <el-menu
       class="sidebar-container-menu"
@@ -30,6 +35,9 @@ import { useRoute } from "vue-router";
 import variables from "@/styles/variables.scss";
 import SidebarItem from "./SidebarItem.vue";
 import { routes } from "@/router";
+import { useStore } from '@/store'
+
+
 export default {
   name: "Sidebar",
   components: {
@@ -37,14 +45,17 @@ export default {
   },
   setup() {
     const route = useRoute();
+    const store = useStore();
+
     const activeMenu = computed(() => {
       const { path } = route;
       return path;
     });
     const scssVariables = computed(() => variables);
-    const isCollapse = ref(true);
+    const isCollapse = computed(() => !store.getters.sidebar.opened);
+
     const menuRoutes = computed(() => routes);
-    console.log(routes,"routes")
+    console.log(routes, "routes");
     return {
       scssVariables,
       isCollapse,

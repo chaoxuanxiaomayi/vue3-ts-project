@@ -9,16 +9,20 @@
     "svgo": "svgo -f src/icons/svg --config=src/icons/svgo.yml"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^1.1.4",
     "@vue/runtime-core": "^3.2.31",
     "axios": "^0.26.0",
     "element-plus": "^2.0.3",
     "fast-glob": "^3.2.11",
     "normalize.css": "^8.0.1",
     "npm": "^8.5.2",
+    "path-to-regexp": "^6.2.0",
     "qs": "^6.10.3",
+    "screenfull": "^6.0.1",
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.21",

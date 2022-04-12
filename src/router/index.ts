@@ -1,11 +1,12 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Layout from '@/layout/index.vue'
 
-export const asyncRoutes :Array<RouteRecordRaw> =[
+// 看作是异步获取路由
+export const asyncRoutes: Array<RouteRecordRaw> = [
   {
-    path:"/documentation",
-    component:Layout,
-    redirect:"/documentation/index",
+    path: '/documentation',
+    component: Layout, // 布局组件作为一级路由
+    redirect: '/documentation/index',
     children: [
       {
         path: 'index',
@@ -13,7 +14,8 @@ export const asyncRoutes :Array<RouteRecordRaw> =[
         component: () => import(/* webpackChunkName: "documentation" */ '@/views/documentation/index.vue'),
         meta: {
           title: 'Documentation',
-          icon: 'documentation'
+          icon: 'documentation',
+          hidden: false // 菜单栏不显示
         }
       }
     ]
@@ -30,6 +32,8 @@ export const asyncRoutes :Array<RouteRecordRaw> =[
         meta: {
           title: 'Guide',
           icon: 'guide'
+          // 当guide路由激活时高亮选中的是 documentation/index菜单
+          // activeMenu: '/documentation/index'
         }
       }
     ]
@@ -40,7 +44,8 @@ export const asyncRoutes :Array<RouteRecordRaw> =[
     redirect: '/system/user',
     meta: {
       title: 'System',
-      icon: 'lock'
+      icon: 'lock',
+      alwaysShow: true // 根路由始终显示 哪怕只有一个子路由
     },
     children: [
       {
@@ -48,7 +53,8 @@ export const asyncRoutes :Array<RouteRecordRaw> =[
         component: () => import(/* webpackChunkName: "menu" */ '@/views/system/menu.vue'),
         meta: {
           title: 'Menu Management',
-          icon: 'list'
+          hidden: false,
+          breadcrumb: false
         }
       },
       {
@@ -56,15 +62,14 @@ export const asyncRoutes :Array<RouteRecordRaw> =[
         component: () => import(/* webpackChunkName: "role" */ '@/views/system/role.vue'),
         meta: {
           title: 'Role Management',
-          icon: 'message'
+          hidden: false
         }
       },
       {
         path: 'user',
         component: () => import(/* webpackChunkName: "user" */ '@/views/system/user.vue'),
         meta: {
-          title: 'User Management',
-          icon: 'email'
+          title: 'User Management'
         }
       }
     ]
@@ -82,11 +87,17 @@ export const asyncRoutes :Array<RouteRecordRaw> =[
         }
       }
     ]
+  },
+  { // 404一定放在要在最后面
+    path: '/:pathMatch(.*)*',
+    redirect: '/404',
+    meta: {
+      hidden: true
+    }
   }
 ]
 
-
-const constantRoutes: Array<RouteRecordRaw> = [
+export const constantRoutes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: Layout,
@@ -99,18 +110,54 @@ const constantRoutes: Array<RouteRecordRaw> = [
         meta: {
           title: 'Dashboard',
           icon: 'dashboard'
-
-
+          // icon: 'el-icon-platform-eleme'
         }
       }
     ]
+  },
+  {
+    path: '/redirect',
+    component: Layout,
+    meta: {
+      hidden: true
+    },
+    children: [
+      {  // 带参数的动态路由正则匹配 文档说明 
+        // https://next.router.vuejs.org/zh/guide/essentials/route-matching-syntax.html#%E5%8F%AF%E9%87%8D%E5%A4%8D%E7%9A%84%E5%8F%82%E6%95%B0
+        path: '/redirect/:path(.*)', // 要匹配多级路由 应该加*号
+        component: () => import('@/views/redirect/index.vue')
+      }
+    ]
+  },
+  {
+    path: '/401',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/error-page/401.vue'),
+        meta: {
+          title: '401',
+          icon: '404',
+          hidden: true
+        }
+      }
+    ]
+  },
+  {
+    path: '/404',
+    component: () => import('@/views/error-page/404.vue'),
+    meta: {
+      hidden: true // 404 hidden掉
+    }
   }
 ]
 
 export const routes = [
-  ...constantRoutes, // 解构语法可能报波浪线tslib版本升级 没懂 暂时先不管
+  ...constantRoutes,
   ...asyncRoutes
 ]
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes

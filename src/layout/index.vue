@@ -5,22 +5,28 @@
     </div>
     <div class="main-container">
       <div class="header">
-        <div class="navbar">navbar</div>
+        <div class="navbar">
+          <NavBar/>
+        </div>
         <div class="tags-view">tagsview</div>
       </div>
-      <div class="app-main">
+      <!-- <div class="app-main">
         <h2>app main</h2>
         <router-view></router-view>
-      </div>
+      </div> -->
+      <app-main />
     </div>
   </div>
 </template>
 <script>
 import Sidebar from './components/Sidebar/index.vue'
-
+import AppMain from "./components/AppMain.vue"
+import NavBar from "./components/NavBar.vue"
 export default {
   components: {
-    Sidebar
+    Sidebar,
+    AppMain,
+    NavBar
   }
 }
 </script>
@@ -39,6 +45,7 @@ export default {
       .navbar {
         height: 50px;
         background: #1890ff;
+        width: 100%;
       }
       .tags-view {
         height: 34px;

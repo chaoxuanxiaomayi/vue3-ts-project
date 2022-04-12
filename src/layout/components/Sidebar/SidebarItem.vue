@@ -1,14 +1,19 @@
 <template>
-  <div class="sidebar-item-container">
+  <div v-if="!item.meta || !item.meta.hidden" class="sidebar-item-container">
     <!-- 一个路由下只有一个子路由的时候 只渲染这个子路由 -->
 
-    <template v-if="theOnlyOneChildRoute && !theOnlyOneChildRoute.children">
+    <template v-if="theOnlyOneChildRoute && isRenderSingleRoute">
       <sidebar-item-link
         v-if="theOnlyOneChildRoute.meta"
         :to="resolvePath(theOnlyOneChildRoute.path)"
       >
         <el-menu-item :index="resolvePath(theOnlyOneChildRoute.path)">
-          <svg-icon v-if="icon" class="menu-icon" :icon-class="icon"></svg-icon>
+          <i v-if="icon && icon.includes('el-icon')" :class="icon"></i>
+          <svg-icon
+            v-else-if="icon"
+            class="menu-icon"
+            :icon-class="icon"
+          ></svg-icon>
           <template #title>
             <span>{{ theOnlyOneChildRoute.meta.title }}</span>
           </template>
@@ -16,18 +21,24 @@
       </sidebar-item-link>
     </template>
     <!-- 多个子路由时 -->
-    <el-submenu v-else :index="resolvePath(item.path)" popper-append-to-body>
-      <el-menu-item @click="showFn">
+
+    <!-- 有多个子路由时 -->
+    <el-sub-menu v-else :index="resolvePath(item.path)" popper-append-to-body>
+      <template #title>
+        <i
+          v-if="item.meta && item.meta.icon.includes('el-icon')"
+          :class="icon"
+        ></i>
         <svg-icon
-          v-if="item.meta.icon"
+          v-else-if="item.meta && item.meta.icon"
           class="menu-icon"
           :icon-class="item.meta.icon"
         ></svg-icon>
-        <template #title>
-          <span class="submenu-title">{{ item.meta.title }}</span>
-        </template>
-      </el-menu-item>
-      <div v-if="true">
+        <span v-if="item.meta" class="submenu-title">{{
+          item.meta.title
+        }}</span>
+      </template>
+      <template v-if="item.children">
         <sidebar-item
           v-for="child in item.children"
           :key="child.path"
@@ -36,8 +47,8 @@
           :base-path="resolvePath(child.path)"
         >
         </sidebar-item>
-      </div>
-    </el-submenu>
+      </template>
+    </el-sub-menu>
   </div>
 </template>
 
@@ -47,7 +58,7 @@ import { RouteRecordRaw } from "vue-router";
 import path from "path-browserify";
 import SidebarItemLink from "./SidebarItemLink.vue";
 import { isExternal } from "@/utils/validate";
-
+import { MenuItemRouter } from "@/router/type";
 export default defineComponent({
   name: "SidebarItem",
   components: {
@@ -56,7 +67,7 @@ export default defineComponent({
   props: {
     item: {
       // 当前路由（此时的父路由）
-      type: Object as PropType<RouteRecordRaw>,
+      type: Object as PropType<MenuItemRouter>,
       required: true,
     },
     basePath: {
@@ -110,12 +121,15 @@ export default defineComponent({
       };
     });
 
+    // 是否有可渲染子路由
+    const noShowingChildren = computed(() => showingChildNumber.value === 0);
+
     // menu icon
     const icon = computed(() => {
       // 子路由 如果没有icon就用父路由的
       return (
         theOnlyOneChildRoute.value?.meta?.icon ||
-        (props.item.meta && props.item.meta.icon)
+        ((item.value.meta && item.value.meta.icon) as string)
       );
     });
 
@@ -129,12 +143,24 @@ export default defineComponent({
       return path.resolve(props.basePath, childPath);
     };
     let showFn = () => {};
+    // 设置 alwaysShow: true，这样它就会忽略上面定义的规则，一直显示根路由 哪怕只有一个子路由也会显示为嵌套的路由菜单
+    const alwaysShowRootMenu = computed(
+      () => props.item.meta && props.item.meta.alwaysShow
+    );
+
+    // 是否只有一条可渲染路由
+    const isRenderSingleRoute = computed(
+      () =>
+        !alwaysShowRootMenu.value &&
+        (!theOnlyOneChildRoute.value?.children || noShowingChildren.value)
+    );
 
     return {
       theOnlyOneChildRoute,
       icon,
       resolvePath,
       showFn,
+      isRenderSingleRoute,
     };
   },
 });
